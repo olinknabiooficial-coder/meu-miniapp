@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR">/js/telegram-web-app.js
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Catálogo de Dramas</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    const s = document.createElement('script');
+    s.src = 'https:' + '//telegram.org/js/telegram-web-app.js';
+    document.head.appendChild(s);
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -95,11 +99,15 @@
   <div id="conteudo" class="loading">Carregando catálogo...</div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    const WORKER_URL = 'https:' + '//still-credit-78bb.dieginhomirante.workers.dev';
 
-    const WORKER_URL = "https:/still-credit-78bb.dieginhomirante.workers.dev";
+    window.addEventListener('load', () => {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      }
+      carregarDramas();
+    });
 
     async function carregarDramas() {
       const container = document.getElementById("conteudo");
@@ -136,10 +144,13 @@
     }
 
     function abrirDrama(id, titulo) {
-      tg.showAlert(`Você selecionou: ${titulo} (ID: ${id}). Em seguida vamos ativar o player de episódios!`);
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.showAlert(`Você selecionou: ${titulo} (ID: ${id}). Em seguida vamos ativar o player de episódios!`);
+      } else {
+        alert(`Você selecionou: ${titulo}`);
+      }
     }
-
-    carregarDramas();
   </script>
 </body>
-</html>
+  </html>
+  
