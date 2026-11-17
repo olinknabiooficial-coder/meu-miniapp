@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Catálogo de Dramas</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://telegram.org"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -99,7 +99,7 @@
     tg.ready();
     tg.expand();
 
-    const WORKER_URL = "https:/still-credit-78bb.dieginhomirante.workers.dev";
+    const WORKER_URL = "https://workers.dev";
 
     async function carregarDramas() {
       const container = document.getElementById("conteudo");
@@ -131,7 +131,7 @@
           </div>
         `).join("");
       } catch (e) {
-        container.innerText = "Erro ao carregar catálogo. Tente novamente.";
+        container.innerText = "Erro: " + e.message;
       }
     }
 
@@ -142,5 +142,4 @@
     carregarDramas();
   </script>
 </body>
-    </html>
-  
+</html>
