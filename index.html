@@ -6,6 +6,7 @@
   <title>Catálogo de Dramas</title>
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://jsdelivr.net"></script>
   <script>
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
@@ -94,7 +95,7 @@
   </div>
 
   <script>
-    const WORKER_URL = 'https:' + '//still-credit-78bb.dieginhomirante.workers.dev';
+    const WORKER_URL = 'https://workers.dev';
     const PLATAFORMAS = [
       ["storyreel","StoryReel"],["dramabox","DramaBox"],["reelshort","ReelShort"],["shortmax","ShortMax"],
       ["goodshort","GoodShort"],["flickreels","FlickReels"],["flextv","FlexTV"],["moboreels","MoboReels"],
@@ -115,6 +116,7 @@
 
     let dramaAtualId = "";
     let episodiosMap = {};
+    let hlsInstance = null;
 
     window.addEventListener('load', () => {
       const sel = document.getElementById("plataforma");
@@ -218,38 +220,3 @@
       status.innerText = "Carregando vídeo...";
       try {
         const epData = episodiosMap[chapterId] || {};
-        const epNum = epData.index || epData.índice || epData.episode_index || chapterId;
-        
-        // Enviando id do drama e o parâmetro 'ep' exigido pelo Cloudflare Worker
-        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&ep=${epNum}`);
-        const json = await res.json();
-        
-        const d = json.data || json;
-        const streams = d.streams || [];
-        let videoUrl = d.url || d.video_url || d.play_url || d.link || d.video || (streams.length > 0 ? (streams[0].url || streams[0].play_url) : null);
-        
-        if (typeof json === 'string') videoUrl = json;
-
-        if (videoUrl) {
-          player.src = videoUrl;
-          player.style.display = "block";
-          player.play();
-          status.innerText = "";
-        } else {
-          status.innerText = "Link de vídeo indisponível.";
-        }
-      } catch (e) {
-        status.innerText = "Erro ao carregar vídeo: " + e.message;
-      }
-    }
-
-    function voltarCatalogo() {
-      document.getElementById("detalhe-view").style.display = "none";
-      document.getElementById("home-view").style.display = "block";
-      const player = document.getElementById("player");
-      player.pause();
-      player.src = "";
-    }
-  </script>
-</body>
-</html>
