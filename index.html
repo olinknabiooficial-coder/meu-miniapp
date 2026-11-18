@@ -220,3 +220,48 @@
       status.innerText = "Carregando vídeo...";
       try {
         const epData = episodiosMap[chapterId] || {};
+const epNum = epData.index || epData.índice || epData.episode_index || chapterId;
+const res = await fetch(${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${epNum});
+const json = await res.json();
+const d = json.data || json;
+const streams = d.streams || [];
+let videoUrl = d.url || d.video_url || d.play_url || d.link || d.video || (streams.length > 0 ? (streams[0].url || streams[0].play_url) : null);
+if (typeof json === 'string') videoUrl = json;
+if (videoUrl) {
+player.style.display = "block";
+status.innerText = "";
+if (hlsInstance) {
+hlsInstance.destroy();
+hlsInstance = null;
+}
+if (videoUrl.includes('.m3u8') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+hlsInstance = new Hls();
+hlsInstance.loadSource(videoUrl);
+hlsInstance.attachMedia(player);
+hlsInstance.on(Hls.Events.MANIFEST_PARSED, function () {
+player.play().catch(() => {});
+});
+} else {
+player.src = videoUrl;
+player.play().catch(() => {});
+}
+} else {
+const msgErro = json.message || json.error || json.msg || JSON.stringify(json);
+status.innerText = "Link de vídeo indisponível. Detalhe: " + msgErro;
+}
+} catch (e) {
+status.innerText = "Erro ao carregar vídeo: " + e.message;
+}
+}
+function voltarCatalogo() {
+document.getElementById("detalhe-view").style.display = "none";
+document.getElementById("home-view").style.display = "block";
+const player = document.getElementById("player");
+if (hlsInstance) {
+hlsInstance.destroy();
+hlsInstance = null;
+}
+player.pause();
+player.src = "";
+ 
+    }
