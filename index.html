@@ -212,7 +212,6 @@
         const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}`);
         const json = await res.json();
         
-        // Exibe o JSON bruto na tela para sabermos qual é a chave do vídeo
         status.innerText = "DEBUG: " + JSON.stringify(json);
 
         const d = json.data || json;
