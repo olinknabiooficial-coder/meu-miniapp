@@ -114,6 +114,7 @@
     ];
 
     let dramaAtualId = "";
+    let episodiosMap = {};
 
     window.addEventListener('load', () => {
       const sel = document.getElementById("plataforma");
@@ -183,6 +184,7 @@
       document.getElementById("ep-lista").innerHTML = "";
       document.getElementById("player").style.display = "none";
       document.getElementById("player-status").innerText = "";
+      episodiosMap = {};
 
       try {
         const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/detail&category_p=${plat}&lang=pt&id=${id}`);
@@ -190,9 +192,15 @@
         const dados = json.data || json;
         document.getElementById("det-sinopse").innerText = dados.synopsis || dados.sinopse || dados.description || "";
         const caps = dados.chapters || dados.capítulos || dados.episodes || [];
+        
+        caps.forEach(c => {
+          episodiosMap[c.id] = c;
+        });
+
         document.getElementById("ep-lista").innerHTML = caps.map(c => `
           <button class="ep-btn" id="ep-${c.id}" onclick="tocarEpisodio('${c.id}')">${c.index || c.índice || c.episode_index || c.id}</button>
         `).join("");
+        
         if (caps.length > 0) tocarEpisodio(caps[0].id);
       } catch (e) {
         document.getElementById("det-sinopse").innerText = "Erro ao carregar episódios.";
@@ -209,18 +217,25 @@
 
       status.innerText = "Buscando vídeo...";
       try {
-        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}`);
+        const epData = episodiosMap[chapterId] || {};
+        const videoId = epData.video_id || epData.vid || chapterId;
+        
+        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}&video_id=${videoId}`);
         const json = await res.json();
         
-        status.innerText = "DEBUG: " + JSON.stringify(json);
-
         const d = json.data || json;
-        const videoUrl = d.url || d.video_url || d.play_url || d.link || d.video || (typeof d === 'string' ? d : null);
+        const streams = d.streams || [];
+        let videoUrl = d.url || d.video_url || d.play_url || d.link || d.video || (streams.length > 0 ? (streams[0].url || streams[0].play_url) : null);
         
+        if (typeof json === 'string') videoUrl = json;
+
         if (videoUrl) {
           player.src = videoUrl;
           player.style.display = "block";
           player.play();
+          status.innerText = "";
+        } else {
+          status.innerText = "DEBUG EP: " + JSON.stringify(epData) + " | RES: " + JSON.stringify(json);
         }
       } catch (e) {
         status.innerText = "Erro ao carregar vídeo: " + e.message;
