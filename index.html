@@ -114,7 +114,6 @@
     ];
 
     let dramaAtualId = "";
-    let episodiosMap = {};
 
     window.addEventListener('load', () => {
       const sel = document.getElementById("plataforma");
@@ -184,7 +183,6 @@
       document.getElementById("ep-lista").innerHTML = "";
       document.getElementById("player").style.display = "none";
       document.getElementById("player-status").innerText = "";
-      episodiosMap = {};
 
       try {
         const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/detail&category_p=${plat}&lang=pt&id=${id}`);
@@ -193,10 +191,6 @@
         document.getElementById("det-sinopse").innerText = dados.synopsis || dados.sinopse || dados.description || "";
         const caps = dados.chapters || dados.capítulos || dados.episodes || [];
         
-        caps.forEach(c => {
-          episodiosMap[c.id] = c;
-        });
-
         document.getElementById("ep-lista").innerHTML = caps.map(c => `
           <button class="ep-btn" id="ep-${c.id}" onclick="tocarEpisodio('${c.id}')">${c.index || c.índice || c.episode_index || c.id}</button>
         `).join("");
@@ -217,11 +211,8 @@
 
       status.innerText = "Buscando vídeo...";
       try {
-        const epData = episodiosMap[chapterId] || {};
-        const epNum = epData.index || epData.índice || epData.episode_index || chapterId;
-        
-        // Enviando os parâmetros corretos exigidos pelo Worker
-        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&ep=${epNum}`);
+        // Passa o id do drama e o chapter_id exatamente como a API espera
+        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}`);
         const json = await res.json();
         
         const d = json.data || json;
