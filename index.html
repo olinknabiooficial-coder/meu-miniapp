@@ -16,7 +16,6 @@
       color: #ffffff;
       min-height: 100vh;
     }
-    /* Topo e Busca */
     .topbar {
       position: sticky; top: 0; z-index: 20;
       background: rgba(11, 11, 15, 0.95);
@@ -34,17 +33,13 @@
     select { flex: 1; max-width: 145px; font-weight: 600; }
     input { flex: 2; }
     input::placeholder { color: #6e6e80; }
-
-    /* Grade do Catálogo */
     .container { padding: 14px; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .card {
       background: #15151e; border-radius: 12px;
       overflow: hidden; cursor: pointer;
       border: 1px solid #22222f;
-      transition: transform 0.15s;
     }
-    .card:active { transform: scale(0.98); }
     .poster-wrap { position: relative; width: 100%; aspect-ratio: 3 / 4; background: #1e1e2a; }
     .poster-wrap img { width: 100%; height: 100%; object-fit: cover; }
     .badge-eps {
@@ -58,8 +53,6 @@
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     .loading { text-align: center; padding: 50px 16px; color: #88889a; font-size: 14px; }
-
-    /* Modal de Detalhes (Estilo Streaming) */
     #modal-detalhe {
       display: none; position: fixed; inset: 0; z-index: 50;
       background: rgba(0, 0, 0, 0.82);
@@ -106,8 +99,6 @@
       background: #22222e; color: #e2e2ec; border: 1px solid #323244;
       padding: 12px 8px; border-radius: 12px; font-weight: 600; font-size: 12px; cursor: pointer;
     }
-
-    /* Tela do Player Fixo */
     #player-view { display: none; padding-bottom: 30px; }
     .player-top {
       padding: 10px 14px; display: flex; align-items: center; gap: 10px;
@@ -138,7 +129,6 @@
 </head>
 <body>
 
-  <!-- TELA INICIAL -->
   <div id="home-view">
     <div class="topbar">
       <select id="plataforma" onchange="carregarDramas()"></select>
@@ -149,7 +139,6 @@
     </div>
   </div>
 
-  <!-- MODAL DE DETALHES -->
   <div id="modal-detalhe" onclick="if(event.target===this) fecharModal()">
     <div class="modal-sheet">
       <div class="modal-header">
@@ -171,7 +160,6 @@
     </div>
   </div>
 
-  <!-- TELA DO PLAYER FIXO -->
   <div id="player-view">
     <div class="player-top">
       <button class="btn-back" onclick="voltarDoPlayer()">← Catálogo</button>
@@ -239,57 +227,12 @@
         box.innerText = "Erro ao carregar catálogo: " + e.message;
       }
     }
-}
-async function tocarIndice(idx) {
-const cap = capitulosAtuais[idx];
-if (!cap) return;
-document.querySelectorAll(".ep-btn").forEach(function(b) { b.classList.remove("ativo"); });
-const btn = document.getElementById("ep-btn-" + idx);
-if (btn) btn.classList.add("ativo");
-const cid = cap.chapter_id || cap.id || cap.vid || cap.index || (idx + 1);
-mostrarStatus("Carregando episódio...");
-try {
-const url = WORKER_URL + "?endpoint=/api/v2/video&category_p=" + dramaAtual.plat + "〈=pt&id=" + encodeURIComponent(dramaAtual.id) + "&chapter_id=" + encodeURIComponent(cid);
-const r = await fetch(url);
-const j = await r.json();
-const d = j.data || j;
-const streams = d.streams || [];
-let videoUrl = d.url || d.video_url || d.play_url || (streams.length > 0 ? streams[0].url : null);
-if (videoUrl) {
-esconderStatus();
-const video = document.getElementById("video-player");
-if (hls) { hls.destroy(); hls = null; }
-if (videoUrl.indexOf(".m3u8") !== -1 && window.Hls && Hls.isSupported()) {
-hls = new Hls();
-hls.loadSource(videoUrl);
-hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(function(){}); });
-} else {
-video.src = videoUrl;
-video.play().catch(function(){});
-}
-} else {
-const err = j.message || j.error || JSON.stringify(j);
-mostrarStatus("Vídeo indisponível (ID: " + dramaAtual.id + " | Cap: " + cid + "): " + err);
-}
-} catch (e) {
-mostrarStatus("Erro de conexão: " + e.message);
-}
-}
-function mostrarStatus(txt) {
-const el = document.getElementById("status-msg");
-el.innerText = txt;
-el.style.display = "block";
-}
-function esconderStatus() {
-document.getElementById("status-msg").style.display = "none";
-}
-function voltarDoPlayer() {
-const video = document.getElementById("video-player");
-if (hls) { hls.destroy(); hls = null; }
-video.pause();
-video.src = "";
-document.getElementById("player-view").style.display = "none";
-document.getElementById("home-view").style.display = "block";
- 
-    }
+
+    async function buscarDramas() {
+      const q = document.getElementById("busca").value.trim();
+      if (!q) return carregarDramas();
+      const box = document.getElementById("conteudo");
+      const plat = document.getElementById("plataforma").value;
+      box.className = "loading";
+      box.innerText = "Buscando...";
+      try {
