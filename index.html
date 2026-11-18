@@ -239,4 +239,57 @@
         box.innerText = "Erro ao carregar catálogo: " + e.message;
       }
     }
-
+}
+async function tocarIndice(idx) {
+const cap = capitulosAtuais[idx];
+if (!cap) return;
+document.querySelectorAll(".ep-btn").forEach(function(b) { b.classList.remove("ativo"); });
+const btn = document.getElementById("ep-btn-" + idx);
+if (btn) btn.classList.add("ativo");
+const cid = cap.chapter_id || cap.id || cap.vid || cap.index || (idx + 1);
+mostrarStatus("Carregando episódio...");
+try {
+const url = WORKER_URL + "?endpoint=/api/v2/video&category_p=" + dramaAtual.plat + "〈=pt&id=" + encodeURIComponent(dramaAtual.id) + "&chapter_id=" + encodeURIComponent(cid);
+const r = await fetch(url);
+const j = await r.json();
+const d = j.data || j;
+const streams = d.streams || [];
+let videoUrl = d.url || d.video_url || d.play_url || (streams.length > 0 ? streams[0].url : null);
+if (videoUrl) {
+esconderStatus();
+const video = document.getElementById("video-player");
+if (hls) { hls.destroy(); hls = null; }
+if (videoUrl.indexOf(".m3u8") !== -1 && window.Hls && Hls.isSupported()) {
+hls = new Hls();
+hls.loadSource(videoUrl);
+hls.attachMedia(video);
+hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(function(){}); });
+} else {
+video.src = videoUrl;
+video.play().catch(function(){});
+}
+} else {
+const err = j.message || j.error || JSON.stringify(j);
+mostrarStatus("Vídeo indisponível (ID: " + dramaAtual.id + " | Cap: " + cid + "): " + err);
+}
+} catch (e) {
+mostrarStatus("Erro de conexão: " + e.message);
+}
+}
+function mostrarStatus(txt) {
+const el = document.getElementById("status-msg");
+el.innerText = txt;
+el.style.display = "block";
+}
+function esconderStatus() {
+document.getElementById("status-msg").style.display = "none";
+}
+function voltarDoPlayer() {
+const video = document.getElementById("video-player");
+if (hls) { hls.destroy(); hls = null; }
+video.pause();
+video.src = "";
+document.getElementById("player-view").style.display = "none";
+document.getElementById("home-view").style.display = "block";
+ 
+    }
