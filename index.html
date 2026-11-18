@@ -86,7 +86,7 @@
   <div id="detalhe-view">
     <button class="btn-voltar" onclick="voltarCatalogo()">← Voltar ao catálogo</button>
     <video id="player" controls playsinline></video>
-    <div id="player-status" style="font-size:13px; color:#f5c518; margin-bottom:8px;"></div>
+    <div id="player-status" style="font-size:12px; color:#f5c518; margin-bottom:8px; word-break: break-all;"></div>
     <h2 id="det-titulo" style="font-size:18px; margin-bottom:6px;"></h2>
     <p id="det-sinopse" class="sinopse"></p>
     <h3 style="font-size:14px; margin-bottom:10px;">Episódios</h3>
@@ -207,23 +207,24 @@
       const btn = document.getElementById(`ep-${chapterId}`);
       if (btn) btn.classList.add("ativo");
 
-      status.innerText = "Carregando vídeo...";
+      status.innerText = "Buscando vídeo...";
       try {
         const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}`);
         const json = await res.json();
+        
+        // Exibe o JSON bruto na tela para sabermos qual é a chave do vídeo
+        status.innerText = "DEBUG: " + JSON.stringify(json);
+
         const d = json.data || json;
-        const videoUrl = d.url || d.video_url || d.play_url || d.link || (typeof d === 'string' ? d : null);
+        const videoUrl = d.url || d.video_url || d.play_url || d.link || d.video || (typeof d === 'string' ? d : null);
         
         if (videoUrl) {
           player.src = videoUrl;
           player.style.display = "block";
           player.play();
-          status.innerText = "";
-        } else {
-          status.innerText = "Link de vídeo indisponível.";
         }
       } catch (e) {
-        status.innerText = "Erro ao carregar vídeo.";
+        status.innerText = "Erro ao carregar vídeo: " + e.message;
       }
     }
 
