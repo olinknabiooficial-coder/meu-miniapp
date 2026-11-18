@@ -220,8 +220,8 @@
         const epData = episodiosMap[chapterId] || {};
         const epNum = epData.index || epData.índice || epData.episode_index || chapterId;
         
-        // Enviando tanto chapter_id quanto ep para garantir compatibilidade com o Worker
-        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}&ep=${epNum}`);
+        // Enviando o parâmetro 'chapter' que é o padrão esperado por essa rota de vídeo
+        const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter=${epNum}`);
         const json = await res.json();
         
         const d = json.data || json;
