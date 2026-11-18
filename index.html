@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Catálogo de Dramas</title>
   
-  <script src="https://telegram.org"></script>
-  <script src="https://jsdelivr.net"></script>
+  <script>
+    document.write('<scr' + 'ipt src="https:' + '//telegram.org/js/telegram-web-app.js"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="https:' + '//cdn.jsdelivr.net/npm/hls.js@latest"></scr' + 'ipt>');
+  </script>
+
   <script>
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
@@ -92,10 +95,11 @@
     <p id="det-sinopse" class="sinopse"></p>
     <h3 style="font-size:14px; margin-bottom:10px;">Episódios</h3>
     <div id="ep-lista" class="ep-grid"></div>
-  </div>
+   </div>
 
   <script>
-    const WORKER_URL = 'https://workers.dev';
+    const WORKER_URL = 'https:' + '//still-credit-78bb.dieginhomirante.workers.dev'
+      ;
     const PLATAFORMAS = [
       ["storyreel","StoryReel"],["dramabox","DramaBox"],["reelshort","ReelShort"],["shortmax","ShortMax"],
       ["goodshort","GoodShort"],["flickreels","FlickReels"],["flextv","FlexTV"],["moboreels","MoboReels"],
@@ -221,7 +225,8 @@
       try {
         const epData = episodiosMap[chapterId] || {};
   const epNum = epData.index || epData.índice || epData.episode_index || chapterId;
-const res = await fetch(${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${epNum});
+const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${epNum}`);
+    
 const json = await res.json();
 const d = json.data || json;
 const streams = d.streams || [];
@@ -265,3 +270,7 @@ player.pause();
 player.src = "";
  
     }
+  </script>
+</body>
+</html>
+  
