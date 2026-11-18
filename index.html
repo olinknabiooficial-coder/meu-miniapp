@@ -225,8 +225,8 @@
       try {
         const epData = episodiosMap[chapterId] || {};
   const epNum = epData.index || epData.índice || epData.episode_index || chapterId;
-const res = await fetch(`${WORKER_URL}?endpoint=/api/v2/video&category_p=${plat}&lang=pt&id=${dramaAtualId}&chapter_id=${chapterId}&ep=${epNum}`);
-        
+const res = await fetch(WORKER_URL + "?endpoint=/api/v2/video&category_p=" + plat + "&lang=pt&id=" + dramaAtualId + "&chapter_id=" + epNum);
+
 const json = await res.json();
 const d = json.data || json;
 const streams = d.streams || [];
